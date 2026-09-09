@@ -331,12 +331,3 @@ carregado e receber resposta correta citando o trecho de onde veio.
   falhar — a parte determinística do grafo tem que continuar funcionando
   sozinha).
 
-## Decisões em aberto
-
-Resolver com o grupo antes de começar a implementação:
-
-1. **Formato de entrada da matriz curricular real** — CSV, planilha, ou
-   cadastro manual via endpoint da Fase 3.
-
-Autenticação (Fase 4), provedor de LLM (Fase 8) e de embedding (Fase 9) já
-estão decididos, não precisa reabrir essas discussões.

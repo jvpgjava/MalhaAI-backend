@@ -85,7 +85,12 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of(properties.getCors().getAllowedOrigin()));
+		// FRONTEND_ORIGIN + qualquer porta local do ng serve (quando 4200 está ocupada)
+		config.setAllowedOriginPatterns(List.of(
+				properties.getCors().getAllowedOrigin(),
+				"http://localhost:*",
+				"http://127.0.0.1:*"
+		));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
 		config.setAllowCredentials(true);

@@ -91,15 +91,23 @@ $env:JWT_SECRET = "change-me-to-a-long-secret-at-least-256-bits-long-for-hs256!!
 ### Rodar também as camadas de IA (Fases 8 e 9)
 
 ```powershell
-$env:ABACUS_API_KEY = "sua_chave_abacus"
+$env:ABACUS_API_KEY = "sua_chave_abacus"   # alias aceito: ABACUSAI_API_KEY
 $env:ABACUS_BASE_URL = "https://routellm.abacus.ai/v1"
-$env:ABACUS_MODEL_NAME = "claude-sonnet-5"
+$env:ABACUS_MODEL_NAME = "claude-sonnet-5" # Claude Sonnet 5 na RouteLLM
 
 $env:GOOGLE_API_KEY = "sua_chave_google"
-$env:GEMINI_MODEL_NAME = "gemini-embedding-001"
+$env:GEMINI_MODEL_NAME = "gemini-embedding-001"  # embeddings com 768 dimensões
+$env:FRONTEND_ORIGIN = "http://localhost:4200"   # CORS do Angular
 ```
 
 Sem essas chaves, o restante da API sobe normalmente; as rotas de explicação/RAG respondem **503**.
+
+Depois de subir com as chaves, a coordenação pode indexar os chunks seed:
+
+```powershell
+# com JWT de COORDENACAO
+# POST http://localhost:8080/api/documentos/indexar
+```
 
 ### Variáveis úteis
 
@@ -112,9 +120,11 @@ Sem essas chaves, o restante da API sobe normalmente; as rotas de explicação/R
 | `DB_PASSWORD` | `postgres` | Senha |
 | `PORT` | `8080` | Porta HTTP da API |
 | `JWT_SECRET` | (valor longo no yml) | Assinatura do JWT — troque em produção |
-| `FRONTEND_ORIGIN` | `http://localhost:5173` | Origem CORS do frontend |
-| `ABACUS_API_KEY` | vazio | LLM (explicação / resposta RAG) |
+| `FRONTEND_ORIGIN` | `http://localhost:4200` | Origem CORS do frontend Angular |
+| `ABACUS_API_KEY` / `ABACUSAI_API_KEY` | vazio | LLM (explicação / resposta RAG) |
+| `ABACUS_MODEL_NAME` | `claude-sonnet-5` | Modelo na RouteLLM |
 | `GOOGLE_API_KEY` | vazio | Embeddings Gemini |
+| `GEMINI_MODEL_NAME` | `gemini-embedding-001` | Modelo de embedding (768 dims) |
 
 ---
 

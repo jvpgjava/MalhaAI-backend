@@ -22,6 +22,7 @@ public class GeminiEmbeddingAdapter implements EmbeddingPort {
 			this.embeddingModel = GoogleAiEmbeddingModel.builder()
 					.apiKey(apiKey)
 					.modelName(properties.getGemini().getModelName())
+					.outputDimensionality(768)
 					.build();
 		}
 	}

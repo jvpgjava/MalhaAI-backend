@@ -33,14 +33,16 @@ malhaia:
     secret: ${JWT_SECRET:change-me-to-a-long-secret-at-least-256-bits-long-for-hs256!!}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   cors:
-    allowed-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+    allowed-origin: ${FRONTEND_ORIGIN:http://localhost:4200}
   abacus:
-    api-key: ${ABACUS_API_KEY:}
+    # Aceita ABACUS_API_KEY ou ABACUSAI_API_KEY (alias comum)
+    api-key: ${ABACUS_API_KEY:${ABACUSAI_API_KEY:}}
     base-url: ${ABACUS_BASE_URL:https://routellm.abacus.ai/v1}
+    # ID RouteLLM: claude-sonnet-5
     model-name: ${ABACUS_MODEL_NAME:claude-sonnet-5}
   gemini:
     api-key: ${GOOGLE_API_KEY:}
-    model-name: ${GEMINI_MODEL_NAME:gemini-embedding-001}
+    model-name: ${GEMINI_MODEL_NAME:${EMBEDDING_MODEL:gemini-embedding-001}}
 
 springdoc:
   api-docs:

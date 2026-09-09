@@ -48,7 +48,7 @@ public class MalhaiaProperties {
 	}
 
 	public static class Cors {
-		private String allowedOrigin = "http://localhost:5173";
+		private String allowedOrigin = "http://localhost:4200";
 
 		public String getAllowedOrigin() {
 			return allowedOrigin;

@@ -1,0 +1,11 @@
+# Copie para application-local.yml e preencha as chaves.
+# application-local.yml está no .gitignore — não vai pro git.
+
+malhaia:
+  abacus:
+    api-key: SUA_ABACUSAI_API_KEY
+    base-url: https://routellm.abacus.ai/v1
+    model-name: claude-sonnet-5
+  gemini:
+    api-key: SUA_GOOGLE_API_KEY
+    model-name: gemini-embedding-001

@@ -14,8 +14,10 @@ public interface OfertaSemestralRepositoryPort {
 	OfertaSemestral save(OfertaSemestral oferta);
 
 	/**
-	 * Ids das disciplinas com {@code ofertada=true}.
+	 * Ids das disciplinas com {@code ofertada=true} no semestre (aceita 2025.1 / 2025/1).
 	 * Se {@code semestre} for null, considera todas as ofertas com ofertada=true.
 	 */
 	Set<Long> findDisciplinaIdsOfertadas(String semestre);
+
+	List<String> findSemestresDisponiveis();
 }

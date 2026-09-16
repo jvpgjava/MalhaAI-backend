@@ -70,4 +70,32 @@ public class GrafoCurricular {
 		}
 		return filtrado;
 	}
+
+	/**
+	 * Remove disciplinas já concluídas. Pré-requisitos concluídos somem do grafo,
+	 * então o que restava “travado” vira fonte do caminho restante.
+	 */
+	public GrafoCurricular removerConcluidas(Set<Long> concluidas) {
+		if (concluidas == null || concluidas.isEmpty()) {
+			return this;
+		}
+		GrafoCurricular restante = new GrafoCurricular();
+		for (Disciplina disciplina : nos.values()) {
+			if (!concluidas.contains(disciplina.id())) {
+				restante.adicionarDisciplina(disciplina);
+			}
+		}
+		for (Map.Entry<Long, Set<Long>> entry : adjacencia.entrySet()) {
+			Long preReqId = entry.getKey();
+			if (concluidas.contains(preReqId) || !restante.nos.containsKey(preReqId)) {
+				continue;
+			}
+			for (Long disciplinaId : entry.getValue()) {
+				if (!concluidas.contains(disciplinaId) && restante.nos.containsKey(disciplinaId)) {
+					restante.adicionarAresta(preReqId, disciplinaId);
+				}
+			}
+		}
+		return restante;
+	}
 }

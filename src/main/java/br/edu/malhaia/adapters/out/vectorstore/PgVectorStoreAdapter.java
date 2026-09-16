@@ -19,16 +19,23 @@ public class PgVectorStoreAdapter implements VectorStorePort {
 
 	@Override
 	public void indexar(Long documentoId, String titulo, String chunk, float[] embedding) {
+		indexar(documentoId, titulo, chunk, embedding, "NORMA");
+	}
+
+	@Override
+	public void indexar(Long documentoId, String titulo, String chunk, float[] embedding, String fonteTipo) {
 		String vectorLiteral = toVectorLiteral(embedding);
+		String tipo = fonteTipo == null || fonteTipo.isBlank() ? "NORMA" : fonteTipo;
 		jdbcTemplate.update(
 				"""
-						INSERT INTO documento_chunk (documento_id, titulo, trecho, embedding)
-						VALUES (?, ?, ?, CAST(? AS vector))
+						INSERT INTO documento_chunk (documento_id, titulo, trecho, embedding, fonte_tipo)
+						VALUES (?, ?, ?, CAST(? AS vector), ?)
 						""",
 				documentoId,
 				titulo,
 				chunk,
-				vectorLiteral
+				vectorLiteral,
+				tipo
 		);
 	}
 

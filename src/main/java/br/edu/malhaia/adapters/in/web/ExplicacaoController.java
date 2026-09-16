@@ -1,6 +1,7 @@
 package br.edu.malhaia.adapters.in.web;
 
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.ExplicacaoResponse;
+import br.edu.malhaia.adapters.in.web.security.SecurityUtils;
 import br.edu.malhaia.application.usecase.GerarExplicacaoUseCase;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,8 @@ public class ExplicacaoController {
 			@PathVariable Long disciplinaId,
 			@RequestParam(required = false) String semestre
 	) {
-		return new ExplicacaoResponse(gerarExplicacaoUseCase.executar(disciplinaId, semestre));
+		return new ExplicacaoResponse(
+				gerarExplicacaoUseCase.executar(disciplinaId, semestre, SecurityUtils.currentUserId())
+		);
 	}
 }

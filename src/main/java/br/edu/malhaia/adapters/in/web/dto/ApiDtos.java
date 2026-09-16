@@ -91,6 +91,41 @@ public final class ApiDtos {
 	public record ExplicacaoResponse(String explicacao) {
 	}
 
+	public record OrientacaoRequest(
+			@NotBlank String semestre,
+			Long destinoPrioridadeId
+	) {
+	}
+
+	public record OrientacaoEstruturadaResponse(
+			String resumo,
+			List<String> ordemSugerida,
+			List<String> proximosPassos,
+			List<String> alertas,
+			boolean estruturado
+	) {
+	}
+
+	public record OrientacaoResponse(
+			String semestre,
+			String modo,
+			Long destinoId,
+			List<Long> caminhoIds,
+			List<String> caminhoNomes,
+			List<Long> proximasOfertadasIds,
+			List<String> proximasOfertadasNomes,
+			Long primeiraDisciplinaId,
+			String primeiraDisciplinaNome,
+			OrientacaoEstruturadaResponse orientacao,
+			boolean iaDisponivel,
+			boolean roadmapIndexado,
+			List<FonteOrientacaoResponse> fontesConsultadas
+	) {
+	}
+
+	public record FonteOrientacaoResponse(String titulo, String trecho, double similaridade) {
+	}
+
 	public record PerguntaRequest(@NotBlank @Size(max = 2000) String pergunta) {
 	}
 

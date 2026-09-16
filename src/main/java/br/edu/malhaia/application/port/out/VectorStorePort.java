@@ -6,6 +6,8 @@ public interface VectorStorePort {
 
 	void indexar(Long documentoId, String titulo, String chunk, float[] embedding);
 
+	void indexar(Long documentoId, String titulo, String chunk, float[] embedding, String fonteTipo);
+
 	List<TrechoRecuperado> buscarSimilares(float[] embedding, int k);
 
 	List<ChunkPendente> listarSemEmbedding();

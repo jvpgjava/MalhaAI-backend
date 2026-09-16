@@ -85,7 +85,18 @@ public class MalhaiaProperties {
 		}
 
 		public void setModelName(String modelName) {
-			this.modelName = modelName;
+			this.modelName = normalizeModelName(modelName);
+		}
+
+		private static String normalizeModelName(String modelName) {
+			if (modelName == null || modelName.isBlank()) {
+				return "claude-sonnet-5";
+			}
+			String normalized = modelName.trim().toLowerCase().replace('_', '-');
+			return switch (normalized) {
+				case "claude-sonnet", "claude-sonnet-4", "sonnet" -> "claude-sonnet-5";
+				default -> normalized;
+			};
 		}
 	}
 

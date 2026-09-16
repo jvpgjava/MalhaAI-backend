@@ -46,7 +46,7 @@ public class CarregarGrafoUseCase {
 			}
 		}
 
-		if (semestreOferta != null) {
+		if (semestreOferta != null && !semestreOferta.isBlank()) {
 			Set<Long> ofertadas = ofertaRepository.findDisciplinaIdsOfertadas(semestreOferta);
 			return grafo.filtrarPorOfertadas(ofertadas);
 		}

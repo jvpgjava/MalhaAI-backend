@@ -3,9 +3,9 @@ package br.edu.malhaia.adapters.in.web;
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.ArestaResponse;
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.CaminhoCriticoResponse;
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.CaminhoResponse;
+import br.edu.malhaia.adapters.in.web.dto.ApiDtos.DisciplinaOrientacaoResponse;
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.DisciplinaResponse;
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.GrafoResponse;
-import br.edu.malhaia.adapters.in.web.dto.ApiDtos.FonteOrientacaoResponse;
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.OrientacaoEstruturadaResponse;
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.OrientacaoRequest;
 import br.edu.malhaia.adapters.in.web.dto.ApiDtos.OrientacaoResponse;
@@ -117,17 +117,18 @@ public class GrafoController {
 				new OrientacaoEstruturadaResponse(
 						o.resumo(),
 						o.ordemSugerida(),
+						o.disciplinas().stream()
+								.map(d -> new DisciplinaOrientacaoResponse(
+										d.nome(), d.porqueNessaOrdem(), d.sobre()
+								))
+								.toList(),
 						o.proximosPassos(),
 						o.alertas(),
 						o.estruturado()
 				),
 				resultado.iaDisponivel(),
 				resultado.roadmapIndexado(),
-				resultado.fontesConsultadas().stream()
-						.map(f -> new FonteOrientacaoResponse(
-								f.titulo(), f.trecho(), f.similaridade()
-						))
-						.toList()
+				List.of() // fontes internas (RAG/web) — não exibidas ao aluno
 		);
 	}
 

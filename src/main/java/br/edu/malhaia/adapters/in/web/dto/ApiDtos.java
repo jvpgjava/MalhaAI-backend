@@ -97,9 +97,17 @@ public final class ApiDtos {
 	) {
 	}
 
+	public record DisciplinaOrientacaoResponse(
+			String nome,
+			String porqueNessaOrdem,
+			String sobre
+	) {
+	}
+
 	public record OrientacaoEstruturadaResponse(
 			String resumo,
 			List<String> ordemSugerida,
+			List<DisciplinaOrientacaoResponse> disciplinas,
 			List<String> proximosPassos,
 			List<String> alertas,
 			boolean estruturado

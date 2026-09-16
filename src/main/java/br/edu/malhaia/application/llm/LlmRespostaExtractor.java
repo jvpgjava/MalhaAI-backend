@@ -25,9 +25,17 @@ public final class LlmRespostaExtractor {
 		this.objectMapper = objectMapper;
 	}
 
+	public record DisciplinaOrientacao(
+			String nome,
+			String porqueNessaOrdem,
+			String sobre
+	) {
+	}
+
 	public record OrientacaoExtraida(
 			String resumo,
 			List<String> ordemSugerida,
+			List<DisciplinaOrientacao> disciplinas,
 			List<String> proximosPassos,
 			List<String> alertas,
 			boolean estruturado
@@ -45,13 +53,14 @@ public final class LlmRespostaExtractor {
 			return new OrientacaoExtraida(
 					resumo,
 					lista(root, "ordemSugerida"),
+					disciplinas(root),
 					lista(root, "proximosPassos"),
 					lista(root, "alertas"),
 					true
 			);
 		} catch (Exception ignored) {
 			String texto = limpo == null || limpo.isBlank() ? fallbackResumo : limpo;
-			return new OrientacaoExtraida(texto, List.of(), List.of(), List.of(), false);
+			return new OrientacaoExtraida(texto, List.of(), List.of(), List.of(), List.of(), false);
 		}
 	}
 
@@ -70,6 +79,31 @@ public final class LlmRespostaExtractor {
 			return t.substring(start, end + 1).trim();
 		}
 		return t;
+	}
+
+	private static List<DisciplinaOrientacao> disciplinas(JsonNode root) {
+		JsonNode arr = root.get("disciplinas");
+		if (arr == null || !arr.isArray()) {
+			return List.of();
+		}
+		List<DisciplinaOrientacao> out = new ArrayList<>();
+		for (JsonNode item : arr) {
+			String nome = texto(item, "nome");
+			if (nome == null || nome.isBlank()) {
+				continue;
+			}
+			String porque = texto(item, "porqueNessaOrdem");
+			if (porque == null || porque.isBlank()) {
+				porque = texto(item, "porque");
+			}
+			String sobre = texto(item, "sobre");
+			out.add(new DisciplinaOrientacao(
+					nome.trim(),
+					porque == null ? "" : porque.trim(),
+					sobre == null ? "" : sobre.trim()
+			));
+		}
+		return List.copyOf(out);
 	}
 
 	private static String texto(JsonNode root, String field) {

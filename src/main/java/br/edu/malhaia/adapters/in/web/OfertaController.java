@@ -45,7 +45,7 @@ public class OfertaController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	@PreAuthorize("hasRole('COORDENACAO')")
+	@PreAuthorize("hasAnyRole('COORDENACAO','DEV')")
 	public OfertaResponse criar(@Valid @RequestBody OfertaRequest request) {
 		OfertaSemestral salva = ofertaRepository.save(new OfertaSemestral(
 				null,

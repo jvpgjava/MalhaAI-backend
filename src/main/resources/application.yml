@@ -35,10 +35,8 @@ malhaia:
   cors:
     allowed-origin: ${FRONTEND_ORIGIN:http://localhost:4200}
   abacus:
-    # Aceita ABACUS_API_KEY ou ABACUSAI_API_KEY (alias comum)
     api-key: ${ABACUS_API_KEY:${ABACUSAI_API_KEY:}}
     base-url: ${ABACUS_BASE_URL:https://routellm.abacus.ai/v1}
-    # ID RouteLLM: claude-sonnet-5 (aliases: LLM_MODEL / claude_sonnet)
     model-name: ${ABACUS_MODEL_NAME:${LLM_MODEL:claude-sonnet-5}}
   gemini:
     api-key: ${GOOGLE_API_KEY:}

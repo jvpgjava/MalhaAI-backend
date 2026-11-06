@@ -68,44 +68,41 @@ As tabelas e o seed da matriz curricular entram sozinhos na **primeira subida** 
 
 ---
 
-## 3. Variáveis de ambiente
+## 3. Variáveis de ambiente (via `.env`)
 
-A aplicação lê variáveis de ambiente (não carrega arquivo `.env` automaticamente).  
-O arquivo `.env.example` é só um **checklist** do que existe.
-
-### Rodar só o núcleo (grafo, auth, REA) — sem IA
-
-Os defaults do `application.yml` bastam se o Postgres local for:
-
-- host `localhost`, porta `5432`
-- banco `malhaia`
-- usuário `postgres` / senha `postgres`
-
-Se a senha do seu Postgres for outra:
+**Não hardcode chaves** em `application.yml` nem em commits. Use um `.env` local:
 
 ```powershell
-$env:DB_PASSWORD = "sua_senha_aqui"
-$env:JWT_SECRET = "change-me-to-a-long-secret-at-least-256-bits-long-for-hs256!!"
+cd C:\Users\joaog\MalhaAI-backend
+Copy-Item .env.example .env
+# edite .env e preencha ABACUS_API_KEY / GOOGLE_API_KEY / DB_PASSWORD etc.
 ```
 
-### Rodar também as camadas de IA (Fases 8 e 9)
+O `.env` e `application-local.yml` estão no `.gitignore`.
+
+### Subir com o `.env` carregado
 
 ```powershell
-$env:ABACUS_API_KEY = "sua_chave_abacus"   # alias aceito: ABACUSAI_API_KEY
-$env:ABACUS_BASE_URL = "https://routellm.abacus.ai/v1"
-$env:ABACUS_MODEL_NAME = "claude-sonnet-5" # Claude Sonnet 5 na RouteLLM
-
-$env:GOOGLE_API_KEY = "sua_chave_google"
-$env:GEMINI_MODEL_NAME = "gemini-embedding-001"  # embeddings com 768 dimensões
-$env:FRONTEND_ORIGIN = "http://localhost:4200"   # CORS do Angular
+.\scripts\run-local.ps1
 ```
 
-Sem essas chaves, o restante da API sobe normalmente; as rotas de explicação/RAG respondem **503**.
+Isso lê o `.env`, exporta as variáveis na sessão e roda `mvn spring-boot:run`.
 
-Depois de subir com as chaves, a coordenação pode indexar os chunks seed:
+### Alternativa manual (sem o script)
 
 ```powershell
-# com JWT de COORDENACAO
+# exporte as vars do .env na sessão, ou:
+$env:ABACUS_API_KEY = "sua_chave"
+$env:GOOGLE_API_KEY = "sua_chave"
+$env:FRONTEND_ORIGIN = "http://localhost:4200"
+mvn spring-boot:run
+```
+
+Sem as chaves de IA, o núcleo (grafo, auth, REA, oferta) sobe normalmente; rotas de explicação/RAG respondem **503**.
+
+Depois de subir com as chaves, professor/coordenação/DEV pode indexar:
+
+```powershell
 # POST http://localhost:8080/api/documentos/indexar
 ```
 
@@ -134,7 +131,8 @@ Na raiz do repositório:
 
 ```powershell
 cd C:\Users\joaog\MalhaAI-backend
-mvn spring-boot:run
+.\scripts\run-local.ps1
+# ou, sem .env: mvn spring-boot:run
 ```
 
 Espere a mensagem `Started MalhaiaBackendApplication`.
@@ -187,7 +185,8 @@ Cadastro de exemplo (corpo JSON):
 }
 ```
 
-Papéis válidos: `ALUNO` ou `COORDENACAO`.
+Cadastro público (`POST /api/auth/cadastro`) aceita somente `ALUNO`.  
+Papéis `PROFESSOR`, `COORDENACAO` e `DEV` são criados por `POST /api/admin/usuarios` (somente `DEV`).
 
 ---
 
@@ -211,9 +210,18 @@ Invoke-RestMethod -Uri "$base/api/grafo/caminho-critico" -Headers $headers
 
 ### RAG (só com `GOOGLE_API_KEY` + `ABACUS_API_KEY`)
 
-1. Cadastre/logue um usuário `COORDENACAO`.
+1. Logue um usuário `PROFESSOR`, `COORDENACAO` ou `DEV`.
 2. `POST /api/documentos/indexar` (gera embeddings dos chunks seed).
 3. `POST /api/perguntas` com `{ "pergunta": "O que é REA?" }`.
+
+### Papéis
+
+| Papel | Capacidades |
+|---|---|
+| `ALUNO` | Grafo, progresso, eletiva, REA, explicação/perguntas |
+| `PROFESSOR` | Consulta + `POST /api/documentos/indexar` |
+| `COORDENACAO` | Professor + `POST /api/oferta` + REA de outros alunos |
+| `DEV` | Acesso total + `POST /api/admin/usuarios` |
 
 ---
 
@@ -221,20 +229,21 @@ Invoke-RestMethod -Uri "$base/api/grafo/caminho-critico" -Headers $headers
 
 | Método | Rota | Auth |
 |---|---|---|
-| `POST` | `/api/auth/cadastro` | público |
+| `POST` | `/api/auth/cadastro` | público (só `ALUNO`) |
 | `POST` | `/api/auth/login` | público |
+| `POST` | `/api/admin/usuarios` | JWT + `DEV` |
 | `GET` | `/actuator/health` | público |
 | `GET` | `/api/grafo` | JWT |
 | `GET` | `/api/grafo/caminho-critico` | JWT |
 | `GET` | `/api/grafo/caminho?destino={id}` | JWT |
 | `POST` | `/api/disciplinas` | JWT |
 | `POST` | `/api/pre-requisitos` | JWT |
-| `POST` | `/api/oferta` | JWT + `COORDENACAO` |
+| `POST` | `/api/oferta` | JWT + `COORDENACAO` / `DEV` |
 | `GET` / `PUT` | `/api/aluno/progresso` | JWT |
 | `GET` | `/api/aluno/rea` | JWT (próprio aluno) |
-| `GET` | `/api/aluno/{usuarioId}/rea` | JWT + `COORDENACAO` |
+| `GET` | `/api/aluno/{usuarioId}/rea` | JWT + `COORDENACAO` / `DEV` |
 | `GET` | `/api/explicacao/{disciplinaId}` | JWT (+ Abacus) |
-| `POST` | `/api/documentos/indexar` | JWT + `COORDENACAO` (+ Gemini) |
+| `POST` | `/api/documentos/indexar` | JWT + `PROFESSOR` / `COORDENACAO` / `DEV` (+ Gemini) |
 | `POST` | `/api/perguntas` | JWT (+ Gemini + Abacus) |
 
 Planejamento detalhado das fases: [`README_BACKEND.md`](README_BACKEND.md).
@@ -248,6 +257,8 @@ Planejamento detalhado das fases: [`README_BACKEND.md`](README_BACKEND.md).
 | Falha ao conectar no banco | Postgres rodando? `DB_PASSWORD` correta? Banco `malhaia` existe? |
 | Erro na migration com `vector` | Extensão `pgvector` instalada e `\dx` mostra `vector`? |
 | `401` em quase tudo | Faltou `Authorization: Bearer ...` |
-| `403` em `/api/oferta` | Usuário precisa ser `COORDENACAO` |
+| `403` em `/api/oferta` | Usuário precisa ser `COORDENACAO` ou `DEV` |
+| `403` em `/api/admin/**` | Usuário precisa ser `DEV` |
+| `403` em cadastro com outro papel | Cadastro público só aceita `ALUNO` |
 | `503` em explicação/perguntas | `ABACUS_API_KEY` / `GOOGLE_API_KEY` não configuradas |
 | Porta 8080 em uso | Pare o outro processo ou use `$env:PORT = "8081"` |

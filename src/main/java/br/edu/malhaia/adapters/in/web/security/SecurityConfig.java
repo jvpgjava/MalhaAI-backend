@@ -4,6 +4,8 @@ import br.edu.malhaia.config.MalhaiaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -13,8 +15,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -63,7 +63,7 @@ public class SecurityConfig {
 						})
 				)
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/cadastro").permitAll()
 						.requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
 						.requestMatchers(
 								"/v3/api-docs",
@@ -71,9 +71,13 @@ public class SecurityConfig {
 								"/swagger-ui.html",
 								"/swagger-ui/**"
 						).permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/oferta").hasRole("COORDENACAO")
-						.requestMatchers(HttpMethod.POST, "/api/documentos/indexar").hasRole("COORDENACAO")
-						.requestMatchers(HttpMethod.GET, "/api/aluno/*/rea").hasRole("COORDENACAO")
+						.requestMatchers(HttpMethod.POST, "/api/oferta")
+							.hasAnyRole("COORDENACAO", "DEV")
+						.requestMatchers(HttpMethod.POST, "/api/documentos/**")
+							.hasAnyRole("PROFESSOR", "COORDENACAO", "DEV")
+						.requestMatchers("/api/admin/**").hasRole("DEV")
+						.requestMatchers(HttpMethod.GET, "/api/aluno/*/rea")
+							.hasAnyRole("COORDENACAO", "DEV")
 						.anyRequest().authenticated()
 				)
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -85,7 +89,6 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		// FRONTEND_ORIGIN + qualquer porta local do ng serve (quando 4200 está ocupada)
 		config.setAllowedOriginPatterns(List.of(
 				properties.getCors().getAllowedOrigin(),
 				"http://localhost:*",

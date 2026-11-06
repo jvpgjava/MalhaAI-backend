@@ -31,4 +31,18 @@ public final class AuthDtos {
 			Papel papel
 	) {
 	}
+
+	public record AdminCriarUsuarioRequest(
+			@NotBlank @Email String email,
+			@NotBlank @Size(min = 6, max = 100) String senha,
+			@NotNull Papel papel
+	) {
+	}
+
+	public record AdminUsuarioResponse(
+			java.util.UUID usuarioId,
+			String email,
+			Papel papel
+	) {
+	}
 }

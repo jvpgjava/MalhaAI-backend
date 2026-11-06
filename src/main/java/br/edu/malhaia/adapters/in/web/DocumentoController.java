@@ -22,7 +22,7 @@ public class DocumentoController {
 
 	@PostMapping("/indexar")
 	@ResponseStatus(HttpStatus.OK)
-	@PreAuthorize("hasRole('COORDENACAO')")
+	@PreAuthorize("hasAnyRole('PROFESSOR','COORDENACAO','DEV')")
 	public Map<String, Object> indexar() {
 		int indexados = indexarDocumentosUseCase.executar();
 		return Map.of("chunksIndexados", indexados);

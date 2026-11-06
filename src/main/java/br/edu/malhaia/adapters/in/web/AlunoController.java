@@ -45,7 +45,7 @@ public class AlunoController {
 	}
 
 	@GetMapping("/{usuarioId}/rea")
-	@PreAuthorize("hasRole('COORDENACAO')")
+	@PreAuthorize("hasAnyRole('COORDENACAO','DEV')")
 	public List<ElegibilidadeReaResponse> reaDeAluno(
 			@PathVariable UUID usuarioId,
 			@RequestParam(required = false) String semestre

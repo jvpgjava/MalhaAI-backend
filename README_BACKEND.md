@@ -74,8 +74,9 @@ precisar subir banco nem IA.
   grafo de conflito, não dirigido.
 - **AlunoProgresso**: usuarioId (FK para `Usuario`), lista de ids de
   disciplinas concluídas.
-- **Usuario**: id (UUID), email, senhaHash (BCrypt), papel (`ALUNO` ou
-  `COORDENACAO`).
+- **Usuario**: id (UUID), email, senhaHash (BCrypt), papel (`ALUNO`,
+  `PROFESSOR`, `COORDENACAO` ou `DEV`). Cadastro público só cria `ALUNO`;
+  demais papéis via `POST /api/admin/usuarios` (`DEV`).
 - **DocumentoInstitucional**: id, titulo, conteudo, embedding (usado só na
   Fase 9).
 

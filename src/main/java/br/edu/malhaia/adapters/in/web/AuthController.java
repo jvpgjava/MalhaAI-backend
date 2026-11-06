@@ -5,7 +5,9 @@ import br.edu.malhaia.adapters.in.web.dto.AuthDtos.CadastroRequest;
 import br.edu.malhaia.adapters.in.web.dto.AuthDtos.LoginRequest;
 import br.edu.malhaia.adapters.in.web.security.JwtService;
 import br.edu.malhaia.application.port.out.UsuarioRepositoryPort;
+import br.edu.malhaia.domain.exception.AcessoNegadoException;
 import br.edu.malhaia.domain.exception.EmailJaCadastradoException;
+import br.edu.malhaia.domain.model.Papel;
 import br.edu.malhaia.domain.model.Usuario;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,10 @@ public class AuthController {
 	@PostMapping("/cadastro")
 	@ResponseStatus(HttpStatus.CREATED)
 	public AuthResponse cadastro(@Valid @RequestBody CadastroRequest request) {
+		if (request.papel() != Papel.ALUNO) {
+			throw new AcessoNegadoException(
+					"Cadastro público disponível apenas para estudante. Peça a um DEV para criar outros papéis.");
+		}
 		if (usuarioRepository.findByEmail(request.email()).isPresent()) {
 			throw new EmailJaCadastradoException(request.email());
 		}
@@ -47,7 +53,7 @@ public class AuthController {
 				UUID.randomUUID(),
 				request.email().trim().toLowerCase(),
 				passwordEncoder.encode(request.senha()),
-				request.papel()
+				Papel.ALUNO
 		);
 		Usuario salvo = usuarioRepository.save(usuario);
 		String token = jwtService.gerarToken(salvo.id(), salvo.email(), salvo.papel());

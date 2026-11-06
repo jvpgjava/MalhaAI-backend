@@ -49,9 +49,11 @@ public class AllowlistWebSearchAdapter implements WebSearchPort {
 	private static final Pattern SNIPPET = Pattern.compile(
 			"class=\"result__snippet\"[^>]*>(.*?)</", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+	private static final URI SEARCH_ENDPOINT = URI.create("https://html.duckduckgo.com/html/");
+
 	private final HttpClient http = HttpClient.newBuilder()
 			.connectTimeout(Duration.ofSeconds(6))
-			.followRedirects(HttpClient.Redirect.NORMAL)
+			.followRedirects(HttpClient.Redirect.NEVER)
 			.build();
 
 	@Override
@@ -60,12 +62,21 @@ public class AllowlistWebSearchAdapter implements WebSearchPort {
 			return List.of();
 		}
 		try {
+			String consultaSegura = consulta.replaceAll("[\\p{Cntrl}]", " ").trim();
+			if (consultaSegura.length() > 300) {
+				consultaSegura = consultaSegura.substring(0, 300);
+			}
 			String sites = String.join(" OR ", ALLOWLIST.stream().map(d -> "site:" + d).toList());
-			String q = consulta.trim() + " (" + sites + ")";
-			String url = "https://html.duckduckgo.com/html/?q="
-					+ URLEncoder.encode(q, StandardCharsets.UTF_8);
+			String q = consultaSegura + " (" + sites + ")";
+			URI url = URI.create(
+					SEARCH_ENDPOINT + "?q=" + URLEncoder.encode(q, StandardCharsets.UTF_8)
+			);
+			if (!"https".equalsIgnoreCase(url.getScheme())
+					|| !"html.duckduckgo.com".equalsIgnoreCase(url.getHost())) {
+				return List.of();
+			}
 
-			HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+			HttpRequest request = HttpRequest.newBuilder(url)
 					.timeout(Duration.ofSeconds(10))
 					.header("User-Agent", "MalhaIA/1.0 (curricular-assistant; educational)")
 					.GET()
@@ -123,7 +134,11 @@ public class AllowlistWebSearchAdapter implements WebSearchPort {
 
 	private static boolean isAllowlisted(String url) {
 		try {
-			String host = URI.create(url).getHost();
+			URI uri = URI.create(url);
+			if (!"https".equalsIgnoreCase(uri.getScheme())) {
+				return false;
+			}
+			String host = uri.getHost();
 			if (host == null) {
 				return false;
 			}

@@ -9,6 +9,7 @@ import br.edu.malhaia.domain.exception.AcessoNegadoException;
 import br.edu.malhaia.domain.exception.EmailJaCadastradoException;
 import br.edu.malhaia.domain.model.Papel;
 import br.edu.malhaia.domain.model.Usuario;
+import br.edu.malhaia.domain.util.TextoSeguro;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -28,6 +30,7 @@ public class AuthController {
 	private final UsuarioRepositoryPort usuarioRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
+	private final String dummyHash;
 
 	public AuthController(
 			UsuarioRepositoryPort usuarioRepository,
@@ -37,21 +40,22 @@ public class AuthController {
 		this.usuarioRepository = usuarioRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;
+		this.dummyHash = passwordEncoder.encode("timing-pad-not-a-real-account");
 	}
 
 	@PostMapping("/cadastro")
 	@ResponseStatus(HttpStatus.CREATED)
 	public AuthResponse cadastro(@Valid @RequestBody CadastroRequest request) {
 		if (request.papel() != Papel.ALUNO) {
-			throw new AcessoNegadoException(
-					"Cadastro público disponível apenas para estudante. Peça a um DEV para criar outros papéis.");
+			throw new AcessoNegadoException("Acesso negado");
 		}
-		if (usuarioRepository.findByEmail(request.email()).isPresent()) {
-			throw new EmailJaCadastradoException(request.email());
+		String email = TextoSeguro.normalizarEmail(request.email());
+		if (usuarioRepository.findByEmail(email).isPresent()) {
+			throw new EmailJaCadastradoException();
 		}
 		Usuario usuario = new Usuario(
 				UUID.randomUUID(),
-				request.email().trim().toLowerCase(),
+				email,
 				passwordEncoder.encode(request.senha()),
 				Papel.ALUNO
 		);
@@ -62,11 +66,14 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public AuthResponse login(@Valid @RequestBody LoginRequest request) {
-		Usuario usuario = usuarioRepository.findByEmail(request.email().trim().toLowerCase())
-				.orElseThrow(() -> new BadCredentialsException("Credenciais inválidas"));
-		if (!passwordEncoder.matches(request.senha(), usuario.senhaHash())) {
+		String email = TextoSeguro.normalizarEmail(request.email());
+		Optional<Usuario> encontrado = usuarioRepository.findByEmail(email);
+		String hash = encontrado.map(Usuario::senhaHash).orElse(dummyHash);
+		boolean senhaOk = passwordEncoder.matches(request.senha(), hash);
+		if (encontrado.isEmpty() || !senhaOk) {
 			throw new BadCredentialsException("Credenciais inválidas");
 		}
+		Usuario usuario = encontrado.get();
 		String token = jwtService.gerarToken(usuario.id(), usuario.email(), usuario.papel());
 		return new AuthResponse(token, usuario.id(), usuario.email(), usuario.papel());
 	}

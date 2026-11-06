@@ -21,12 +21,18 @@ spring:
 
 server:
   port: ${PORT:8080}
+  tomcat:
+    max-http-form-post-size: 262144
+    max-swallow-size: 262144
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health
+  endpoint:
+    health:
+      show-details: never
 
 malhaia:
   jwt:
@@ -34,6 +40,8 @@ malhaia:
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   cors:
     allowed-origin: ${FRONTEND_ORIGIN:http://localhost:4200}
+  security:
+    trust-proxy: ${TRUST_PROXY:false}
   abacus:
     api-key: ${ABACUS_API_KEY:${ABACUSAI_API_KEY:}}
     base-url: ${ABACUS_BASE_URL:https://routellm.abacus.ai/v1}
@@ -45,5 +53,7 @@ malhaia:
 springdoc:
   api-docs:
     path: /v3/api-docs
+    enabled: ${SPRINGDOC_ENABLED:true}
   swagger-ui:
     path: /swagger-ui.html
+    enabled: ${SPRINGDOC_ENABLED:true}

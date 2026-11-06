@@ -12,15 +12,26 @@ public final class AuthDtos {
 	}
 
 	public record CadastroRequest(
-			@NotBlank @Email String email,
-			@NotBlank @Size(min = 6, max = 100) String senha,
-			@NotNull Papel papel
+			@NotBlank(message = "Informe o e-mail")
+			@Email(message = "E-mail inválido")
+			@Size(max = 254, message = "E-mail muito longo")
+			String email,
+			@NotBlank(message = "Informe a senha")
+			@Size(min = 6, max = 100, message = "A senha deve ter entre 6 e 100 caracteres")
+			String senha,
+			@NotNull(message = "Informe o papel")
+			Papel papel
 	) {
 	}
 
 	public record LoginRequest(
-			@NotBlank @Email String email,
-			@NotBlank String senha
+			@NotBlank(message = "Informe o e-mail")
+			@Email(message = "E-mail inválido")
+			@Size(max = 254, message = "E-mail muito longo")
+			String email,
+			@NotBlank(message = "Informe a senha")
+			@Size(min = 1, max = 100, message = "Senha inválida")
+			String senha
 	) {
 	}
 
@@ -33,9 +44,15 @@ public final class AuthDtos {
 	}
 
 	public record AdminCriarUsuarioRequest(
-			@NotBlank @Email String email,
-			@NotBlank @Size(min = 6, max = 100) String senha,
-			@NotNull Papel papel
+			@NotBlank(message = "Informe o e-mail")
+			@Email(message = "E-mail inválido")
+			@Size(max = 254, message = "E-mail muito longo")
+			String email,
+			@NotBlank(message = "Informe a senha")
+			@Size(min = 6, max = 100, message = "A senha deve ter entre 6 e 100 caracteres")
+			String senha,
+			@NotNull(message = "Informe o papel")
+			Papel papel
 	) {
 	}
 

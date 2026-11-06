@@ -70,7 +70,9 @@ public class SecurityConfig {
 								"/v3/api-docs/**",
 								"/swagger-ui.html",
 								"/swagger-ui/**"
-						).permitAll()
+						).hasRole("DEV")
+						.requestMatchers(HttpMethod.POST, "/api/disciplinas", "/api/pre-requisitos")
+							.hasAnyRole("COORDENACAO", "DEV")
 						.requestMatchers(HttpMethod.POST, "/api/oferta")
 							.hasAnyRole("COORDENACAO", "DEV")
 						.requestMatchers(HttpMethod.POST, "/api/documentos/**")

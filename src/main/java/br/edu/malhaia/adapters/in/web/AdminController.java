@@ -5,6 +5,7 @@ import br.edu.malhaia.adapters.in.web.dto.AuthDtos.AdminUsuarioResponse;
 import br.edu.malhaia.application.port.out.UsuarioRepositoryPort;
 import br.edu.malhaia.domain.exception.EmailJaCadastradoException;
 import br.edu.malhaia.domain.model.Usuario;
+import br.edu.malhaia.domain.util.TextoSeguro;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,9 +34,9 @@ public class AdminController {
 	@PostMapping("/usuarios")
 	@ResponseStatus(HttpStatus.CREATED)
 	public AdminUsuarioResponse criarUsuario(@Valid @RequestBody AdminCriarUsuarioRequest request) {
-		String email = request.email().trim().toLowerCase();
+		String email = TextoSeguro.normalizarEmail(request.email());
 		if (usuarioRepository.findByEmail(email).isPresent()) {
-			throw new EmailJaCadastradoException(email);
+			throw new EmailJaCadastradoException();
 		}
 		Usuario usuario = new Usuario(
 				UUID.randomUUID(),

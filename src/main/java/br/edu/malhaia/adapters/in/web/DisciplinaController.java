@@ -10,6 +10,7 @@ import br.edu.malhaia.domain.model.Disciplina;
 import br.edu.malhaia.domain.model.PreRequisito;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
+@PreAuthorize("hasAnyRole('COORDENACAO','DEV')")
 public class DisciplinaController {
 
 	private final DisciplinaRepositoryPort disciplinaRepository;
